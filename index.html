@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Music Recommender</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+
+    <div class="app-container">
+
+        <!-- Initial Start Screen -->
+        <div id="start-screen" class="screen visible">
+            <h1>Music Mood Recommender</h1>
+            <p>Find the perfect music for your current activity and mood.</p>
+            <button data-action="start">Start</button>
+        </div>
+
+        <!-- Step 1: Ask for Activity -->
+        <div id="activity-screen" class="screen">
+            <h2>What is your current activity?</h2>
+            <div class="options">
+                <button data-action="select-activity" data-value="studying">Studying</button>
+                <button data-action="select-activity" data-value="workout">Workout</button>
+                <button data-action="select-activity" data-value="relaxing">Free time/Relaxing</button>
+            </div>
+        </div>
+        
+        <!-- Step 2 (for Workout): Ask if genre is in mind -->
+        <div id="genre-in-mind-screen" class="screen">
+            <h2>Do you have a certain genre in mind?</h2>
+            <div class="options">
+                <button data-action="genre-in-mind" data-value="yes">Yes</button>
+                <button data-action="genre-in-mind" data-value="no">No</button>
+            </div>
+        </div>
+
+        <!-- Step 3: Ask for Mood -->
+        <div id="mood-screen" class="screen">
+            <h2 id="mood-question">How are you feeling?</h2>
+            <p id="mood-subtitle" class="subtitle"></p>
+            <div class="options-grid" id="mood-options">
+                <!-- Mood buttons will be dynamically inserted here by JS -->
+            </div>
+        </div>
+
+        <!-- Step 4: Show Recommendations -->
+        <div id="recommendation-screen" class="screen">
+            <h2 id="reco-title"></h2>
+            <div id="reco-results" class="results-list">
+                <!-- Recommendation items will be dynamically inserted here -->
+            </div>
+            <div id="reco-follow-up" class="follow-up">
+                <!-- Follow-up questions like "Need artists?" will be here -->
+            </div>
+        </div>
+
+        <!-- Step 5: Final Screen / End State -->
+        <div id="final-screen" class="screen">
+            <h2 id="final-title"></h2>
+            <p id="final-message"></p>
+            <button data-action="restart">Start Over</button>
+        </div>
+
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

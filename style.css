@@ -1,0 +1,171 @@
+/* --- General Setup & Variables --- */
+:root {
+    --primary-bg: #121212;
+    --secondary-bg: #1e1e1e;
+    --primary-text: #ffffff;
+    --secondary-text: #b3b3b3;
+    --accent-color: #1DB954; /* Spotify Green */
+    --hover-color: #1ED760;
+}
+
+body {
+    font-family: 'Poppins', sans-serif;
+    background-color: var(--primary-bg);
+    color: var(--primary-text);
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+/* --- Main App Container --- */
+.app-container {
+    width: 100%;
+    max-width: 600px;
+    background-color: var(--secondary-bg);
+    border-radius: 12px;
+    padding: 40px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    overflow: hidden; /* Ensures child elements don't overflow rounded corners */
+}
+
+/* --- Screen Management --- */
+.screen {
+    display: none; /* Hide all screens by default */
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.screen.visible {
+    display: flex; /* Show the active screen */
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* --- Typography --- */
+h1 {
+    font-size: 2.5rem;
+    color: var(--accent-color);
+    margin-bottom: 0.5rem;
+}
+
+h2 {
+    font-size: 1.8rem;
+    margin-bottom: 2rem;
+}
+
+p {
+    font-size: 1rem;
+    color: var(--secondary-text);
+    margin-bottom: 2rem;
+}
+
+.subtitle {
+    font-size: 0.9rem;
+    margin-top: -1.5rem;
+    margin-bottom: 2rem;
+    max-width: 80%;
+}
+
+/* --- Buttons and Options --- */
+.options, .options-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
+    width: 100%;
+}
+
+.options-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+}
+
+button {
+    background-color: var(--accent-color);
+    color: var(--primary-text);
+    border: none;
+    border-radius: 50px;
+    padding: 15px 30px;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.2s ease;
+    width: 100%; /* Make buttons take full width in grid/flex context */
+    max-width: 250px;
+}
+
+button:hover {
+    background-color: var(--hover-color);
+    transform: scale(1.05);
+}
+
+button:active {
+    transform: scale(0.98);
+}
+
+/* --- Results & Follow-up --- */
+.results-list {
+    list-style: none;
+    padding: 0;
+    margin-bottom: 2rem;
+    width: 100%;
+}
+
+.results-list div {
+    background-color: rgba(255, 255, 255, 0.05);
+    padding: 12px 20px;
+    border-radius: 8px;
+    margin-bottom: 10px;
+    font-size: 1.1rem;
+    transition: background-color 0.2s;
+}
+
+.results-list div:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.follow-up {
+    margin-top: 2rem;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.follow-up h3 {
+    margin: 0 0 1rem 0;
+}
+
+/* --- Responsive Design --- */
+@media (max-width: 640px) {
+    .app-container {
+        padding: 20px;
+    }
+
+    h1 {
+        font-size: 2rem;
+    }
+
+    h2 {
+        font-size: 1.5rem;
+    }
+    
+    .options-grid {
+        grid-template-columns: 1fr; /* Stack mood buttons on small screens */
+    }
+
+    button {
+        padding: 12px 20px;
+        width: 90%;
+    }
+}
