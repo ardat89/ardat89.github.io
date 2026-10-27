@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Gift Bench — An Exploration in Reciprocity</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Ekran Okuyucu Canlı Bölgesi (Erişilebilirlik için dinamik anons alanı) -->
+  <div id="screen-reader-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+  <main class="experience-container">
+
+    <!-- Deneyim Başlığı ve Temel Prensipler -->
+    <header class="experience-header">
+      <h1 class="experience-title">The Gift Bench</h1>
+      <p class="experience-subtitle">
+        An interactive dialogue exploring how earlier gestures linger and shape future responses.
+      </p>
+      <div class="header-badges">
+        <span class="badge"><span class="badge-key">Premise</span> Every action expects a response</span>
+        <span class="badge"><span class="badge-key">Promise</span> Design the dialogue, not the message</span>
+      </div>
+    </header>
+
+    <!-- Ana Etkileşim Sahnesi (Bank ve Paylaşılan Tepsi) -->
+    <section class="bench-stage" aria-label="Interactive Exchange Bench">
+      
+      <!-- Üst Bar: Kural Seçici ve Karşılaştırma Modu -->
+      <div class="stage-top-bar">
+        <div class="rule-indicator">
+          <span class="rule-label">Current Rule:</span>
+          <span id="current-rule-tag" class="rule-tag">Lagged Memory (N=3)</span>
+        </div>
+        <button id="toggle-rule-btn" class="rule-toggle-btn" type="button" aria-label="Switch comparison rule between lagged memory and immediate reflex">
+          ⇄ Switch Rule <kbd>[C]</kbd>
+        </button>
+      </div>
+
+      <!-- Karşı Tarafın Varlığı ve Postürü -->
+      <div class="counterpart-section">
+        <div id="counterpart-presence" class="counterpart-presence posture-attuned" role="status" aria-label="Counterpart's relational posture">
+          <div class="counterpart-avatar" id="counterpart-avatar-icon" aria-hidden="true">👤</div>
+          <div class="counterpart-details">
+            <span class="counterpart-name">Counterpart</span>
+            <span class="counterpart-posture">
+              <span id="counterpart-posture-icon" class="posture-icon" aria-hidden="true">⚖️</span>
+              <span id="counterpart-posture-name">Attuned</span>
+            </span>
+          </div>
+        </div>
+
+        <!-- Düşünme / Tereddüt Göstergesi -->
+        <div id="deliberation-pulse" class="deliberation-pulse" aria-hidden="true">
+          <span>Deliberating past turns</span>
+          <span class="pulse-dot"></span>
+          <span class="pulse-dot"></span>
+          <span class="pulse-dot"></span>
+        </div>
+      </div>
+
+      <!-- Ortak Değişim Tepsisi (The Shared Tray) -->
+      <div class="exchange-tray-wrapper">
+        <span class="tray-label">Shared Exchange Tray</span>
+        <div class="exchange-tray" role="region" aria-label="Tray where offerings meet">
+          <!-- Katılımcının Hediyesi -->
+          <div class="tray-slot">
+            <span class="slot-heading">Your Offering</span>
+            <div id="participant-tray-slot" class="slot-content">
+              <span class="slot-heading">Awaiting gift</span>
+            </div>
+          </div>
+
+          <div style="font-size: 1.5rem; color: #887a6b; font-weight: bold;" aria-hidden="true">⇄</div>
+
+          <!-- Karşı Tarafın Karşılığı -->
+          <div class="tray-slot">
+            <span class="slot-heading">Counterpart Reply</span>
+            <div id="system-tray-slot" class="slot-content">
+              <span class="slot-heading">Awaiting</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Katılımcı Teklif Seçenekleri -->
+      <div class="participant-section">
+        <p class="section-prompt">Choose a token to place on the bench:</p>
+        <div class="tokens-grid" role="group" aria-label="Available tokens to offer">
+          
+          <button class="token-button" data-token="stone" type="button" aria-label="Offer Stone: Grounded and enduring">
+            <span class="btn-icon" aria-hidden="true">🪨</span>
+            <span class="btn-title">Stone</span>
+            <span class="btn-desc">Grounded & enduring</span>
+            <span class="btn-key-hint">Key: [1]</span>
+          </button>
+
+          <button class="token-button" data-token="flower" type="button" aria-label="Offer Flower: Delicate and generous">
+            <span class="btn-icon" aria-hidden="true">🌸</span>
+            <span class="btn-title">Flower</span>
+            <span class="btn-desc">Delicate & generous</span>
+            <span class="btn-key-hint">Key: [2]</span>
+          </button>
+
+          <button class="token-button" data-token="paper" type="button" aria-label="Offer Paper: Folded and conversational">
+            <span class="btn-icon" aria-hidden="true">📜</span>
+            <span class="btn-title">Paper</span>
+            <span class="btn-desc">Folded & thoughtful</span>
+            <span class="btn-key-hint">Key: [3]</span>
+          </button>
+
+          <button class="token-button" data-token="empty" type="button" aria-label="Offer Empty Hand: Withholding or holding space">
+            <span class="btn-icon" aria-hidden="true">🤲</span>
+            <span class="btn-title">Empty Hand</span>
+            <span class="btn-desc">Withholding gesture</span>
+            <span class="btn-key-hint">Key: [4]</span>
+          </button>
+
+        </div>
+      </div>
+
+    </section>
+
+    <!-- Diyalog Özeti ve Tarihçe Şeridi -->
+    <section class="dialogue-summary-bar" aria-label="Dialogue History and Summary">
+      <div class="history-header">
+        <span class="history-title">Recent Dialogue History (Last 3 Turns)</span>
+        <span style="font-size: 0.75rem; color: var(--text-light);">Earlier turns linger</span>
+      </div>
+
+      <!-- 3'lü Hafıza Slotları -->
+      <div id="history-slots-container" class="history-slots">
+        <!-- JavaScript tarafından dinamik oluşturulur -->
+      </div>
+
+      <!-- Anlatıcı / Diyalog Rezonans Metni -->
+      <div class="narrative-box">
+        <p id="narrative-text">The tray is empty. Offer an initial gift to begin the dialogue.</p>
+      </div>
+    </section>
+
+    <!-- Kontrol Araç Çubuğu (Sıfırla, Duraklat, Kısayol Bilgisi) -->
+    <footer class="controls-toolbar">
+      <div class="primary-controls">
+        <button id="reset-btn" class="action-btn" type="button" aria-label="Reset the dialogue back to neutral state">
+          ↺ Reset Dialogue <kbd>[R]</kbd>
+        </button>
+        <button id="pause-btn" class="action-btn" type="button" aria-label="Pause or resume the interaction">
+          ⏸ Pause <kbd>[P]</kbd>
+        </button>
+      </div>
+      <div class="keyboard-legend">
+        <span>Keyboard: <strong>[1-4]</strong> Tokens | <strong>[R]</strong> Reset | <strong>[P]</strong> Pause | <strong>[C]</strong> Compare | <strong>[Esc]</strong> Clear</span>
+      </div>
+    </footer>
+
+  </main>
+
+  <script src="script.js"></script>
+</body>
+</html>
