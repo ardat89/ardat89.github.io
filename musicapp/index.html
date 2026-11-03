@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>16-Step Studio Sequencer · Feedback Exploration</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Ekran okuyucu için canlı durum bildirimi (Erişilebilirlik) -->
+  <div id="sr-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- ÜST GEZİNME VE DURUM ÇUBUĞU -->
+  <header class="top-bar-wrapper">
+    <div class="top-row">
+      <!-- Sol: Başlık ve Restart Kartı -->
+      <div class="title-banner">
+        <button id="restart-btn" class="pill-btn restart-btn" type="button" aria-label="Restart and clear all pegs">
+          <span aria-hidden="true">↻</span> RESTART
+        </button>
+        <div class="title-meta">
+          <h1 class="app-title">STUDIO SEQUENCER 16</h1>
+          <p class="app-subtitle">premise 03 · feedback loop &amp; state legibility</p>
+        </div>
+      </div>
+
+      <!-- Orta: Görünüm Seçici (PLAY | CODE | NOTES) -->
+      <nav class="mode-tabs" role="tablist" aria-label="View Modes">
+        <button id="tab-play" class="tab-btn active" role="tab" aria-selected="true" aria-controls="panel-play" type="button">
+          PLAY
+        </button>
+        <button id="tab-code" class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-code" type="button">
+          CODE
+        </button>
+        <button id="tab-notes" class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-notes" type="button">
+          NOTES
+        </button>
+      </nav>
+
+      <!-- Sağ: Telemetri Kutusu (BPM | STEP | PEGS) -->
+      <div class="telemetry-card" role="status" aria-label="Sequencer live state metrics">
+        <div class="telemetry-cell">
+          <span class="telemetry-label">BPM</span>
+          <span id="telemetry-bpm" class="telemetry-value">120</span>
+        </div>
+        <div class="telemetry-cell">
+          <span class="telemetry-label">STEP</span>
+          <span id="telemetry-step" class="telemetry-value">- / 16</span>
+        </div>
+        <div class="telemetry-cell">
+          <span class="telemetry-label">NOTES</span>
+          <span id="telemetry-pegs" class="telemetry-value accent-num">0</span>
+        </div>
+      </div>
+
+      <!-- En Sağ: Tema Değiştirme Butonu -->
+      <button id="night-btn" class="pill-btn night-btn" type="button" aria-pressed="false" aria-label="Toggle dark studio theme">
+        DARK
+      </button>
+    </div>
+
+    <!-- İkinci Satır: Oynatma, Başa Sarma, Örnek Melodi ve Okurken Duraklat Kontrolleri -->
+    <div class="sub-controls-row">
+      <button id="pause-btn" class="pill-btn transport-btn" type="button" aria-label="Play or Pause sequencer">
+        <span id="pause-btn-icon" aria-hidden="true">▶</span> <span id="pause-btn-text">PLAY</span>
+      </button>
+
+      <button id="rewind-btn" class="pill-btn transport-btn" type="button" aria-label="Rewind playhead to step 1">
+        <span aria-hidden="true">⏮</span> REWIND
+      </button>
+
+      <button id="demo-btn" class="pill-btn transport-btn" type="button" aria-label="Load 16-step sample melody for comparison test">
+        <span aria-hidden="true">♪</span> TEST MELODY (16-STEP)
+      </button>
+
+      <label class="reading-pause-chip" for="pause-reading-checkbox">
+        <input type="checkbox" id="pause-reading-checkbox" checked>
+        <span>Pause while reading</span>
+      </label>
+    </div>
+  </header>
+
+  <!-- ANA SAHNE: GENİŞ 16 ADIMLI YATAY NOTA PORTESİ -->
+  <main class="stage-area">
+    <div class="studio-console">
+      
+      <!-- PLAY PANELİ: 8 Satır x 16 Adım Yatay Müzik Portesi -->
+      <section id="panel-play" class="sheet-frame" role="tabpanel" aria-labelledby="tab-play">
+        <div class="sheet-header">
+          <div class="sheet-brand">
+            <span class="sheet-clef" aria-hidden="true">𝄞</span>
+            <div class="sheet-title-group">
+              <span class="sheet-title">16-STEP HORIZONTAL SHEET MATRIX</span>
+              <span id="feedback-condition-badge" class="condition-badge">Condition A: Full Playhead Feedback</span>
+            </div>
+          </div>
+
+          <div class="bar-markers-legend">
+            <span>4 Bars · 16 Steps (1/16th Resolution)</span>
+          </div>
+        </div>
+
+        <!-- 1..16 Adım Numaraları Başlığı -->
+        <div class="step-headers-wrapper">
+          <div class="pitch-column-spacer" aria-hidden="true">PITCH</div>
+          <div class="step-headers" id="step-headers-row" aria-hidden="true">
+            <!-- JS tarafından 1..16 adım başlıkları oluşturulur -->
+          </div>
+        </div>
+
+        <!-- Yatay Porte Alanı: 8 Nota Satırı x 16 Sütun -->
+        <div class="staff-viewport" id="staff-viewport">
+          <!-- Hareketli Dikey Çalma Çubuğu (Playhead Bar) -->
+          <div id="playhead-bar" class="playhead-bar" aria-hidden="true"></div>
+
+          <!-- 8x16 Nota Izgarası -->
+          <div id="sequencer-grid" class="sequencer-grid" role="grid" aria-label="Horizontal music staff, 8 pitches by 16 steps">
+            <!-- JS tarafından satırlar ve 16'lı nota yuvaları oluşturulur -->
+          </div>
+        </div>
+
+        <div class="sheet-footer">
+          <span>Scale: C5 · B4 · A4 · G4 · F4 · E4 · D4 · C4 (Full Octave)</span>
+          <span>Non-Color Indicators: ● Root · ◆ Seventh/Second · ▲ Fifth · ■ Fourth · ★ Third</span>
+        </div>
+      </section>
+
+      <!-- CODE PANELİ: Canlı DESIGN ve BPM / Step Düzenleyici -->
+      <section id="panel-code" class="drawer-panel hidden" role="tabpanel" aria-labelledby="tab-code">
+        <div class="drawer-header">
+          <h2 class="drawer-title">LIVE DESIGN &amp; RULE INSPECTOR (CODE)</h2>
+          <p class="drawer-desc">Modify the DESIGN parameters below to immediately reshape the 16-step clock, sound timbre, and feedback loop.</p>
+        </div>
+
+        <div class="code-editor-grid">
+          <div class="code-control-card">
+            <label for="input-bpm" class="code-label">
+              <span>DESIGN.BPM</span>
+              <strong id="label-bpm-val">120 BPM</strong>
+            </label>
+            <input type="range" id="input-bpm" min="60" max="240" step="5" value="120">
+            <p class="code-comment">// Tempo hızı. Adım aralığını (60000 / (BPM * 4)) milisaniye olarak günceller.</p>
+          </div>
+
+          <div class="code-control-card">
+            <label for="select-steps" class="code-label">
+              <span>DESIGN.STEPS (Active Loop Length)</span>
+            </label>
+            <select id="select-steps" class="code-select">
+              <option value="16" selected>16 Steps (Full 4-Beat Bar)</option>
+              <option value="12">12 Steps (3/4 Waltz Meter)</option>
+              <option value="8">8 Steps (Compact Half-Bar)</option>
+            </select>
+            <p class="code-comment">// (step + 1) % STEPS kuralındaki aktif döngü uzunluğunu değiştirir.</p>
+          </div>
+
+          <div class="code-control-card">
+            <label for="select-waveform" class="code-label">
+              <span>DESIGN.WAVEFORM</span>
+            </label>
+            <select id="select-waveform" class="code-select">
+              <option value="triangle" selected>triangle (Warm Electric Piano)</option>
+              <option value="sine">sine (Pure Glass Bell)</option>
+              <option value="square">square (Retro Synth Lead)</option>
+              <option value="sawtooth">sawtooth (Warm Pluck Brass)</option>
+            </select>
+            <p class="code-comment">// Web Audio sentezleyicinin dalga biçimini ve tınısını belirler.</p>
+          </div>
+
+          <div class="code-control-card">
+            <label for="select-feedback-mode" class="code-label">
+              <span>DESIGN.FEEDBACK_MODE (Comparison A/B)</span>
+            </label>
+            <select id="select-feedback-mode" class="code-select">
+              <option value="FULL" selected>Condition A: Full Playhead &amp; Step Feedback</option>
+              <option value="BLIND_STEP">Condition B: Hidden Playhead (Audio Only)</option>
+            </select>
+            <p class="code-comment">// Gizli durumun (1..16 aktif adımın) görsel geri bildirimini açar veya gizler.</p>
+          </div>
+
+          <div class="code-control-card">
+            <label class="code-label" for="checkbox-preview-sound">
+              <span>DESIGN.PREVIEW_ON_PLACE</span>
+            </label>
+            <label class="inline-check">
+              <input type="checkbox" id="checkbox-preview-sound" checked>
+              <span>Play pitch chime immediately when toggling a note</span>
+            </label>
+            <p class="code-comment">// Nota eklendiğinde anında işitsel onay (action acknowledgement) verir.</p>
+          </div>
+        </div>
+
+        <!-- Canlı Kod Görünümü -->
+        <pre id="live-code-pre" class="live-code-block" aria-label="Live DESIGN object configuration"></pre>
+      </section>
+
+      <!-- NOTES PANELİ: Tasarım Notları ve 16 Adımlı Karşılaştırma Deneyi -->
+      <section id="panel-notes" class="drawer-panel hidden" role="tabpanel" aria-labelledby="tab-notes">
+        <div class="drawer-header">
+          <h2 class="drawer-title">DESIGN NOTES &amp; 16-STEP COMPARISON EXPERIMENT</h2>
+          <p class="drawer-desc">Premise: The system's state must be understandable. Promise: Design the feedback loop, not the outcome.</p>
+        </div>
+
+        <div class="notes-columns">
+          <div class="note-card">
+            <h3>1. Why 16 Steps Amplifies Feedback Need</h3>
+            <p>With 16 horizontal steps across 8 pitches (128 cells), tracking the active beat purely by ear becomes significantly harder than on an 8-step grid. Visual state feedback (the sweeping playhead bar, 4-beat measure dividers, and step counter) bridges the gap between hearing an error and knowing which column to correct.</p>
+          </div>
+
+          <div class="note-card">
+            <h3>2. Comparison to Try (A/B Test)</h3>
+            <p>Click <strong>♪ TEST MELODY (16-STEP)</strong> to load a 16-step arpeggio that has one intentionally sour note placed at <strong>Step 14</strong>. Ask a classmate to locate and fix the sour note under <strong>Condition B (Hidden Playhead)</strong> versus <strong>Condition A (Full Playhead Feedback)</strong> inside the <strong>CODE</strong> tab.</p>
+          </div>
+
+          <div class="note-card">
+            <h3>3. Accessible Multi-Modal Input</h3>
+            <p>Navigate all 16 columns and 8 rows via <strong>Arrow keys</strong> + <strong>Enter</strong>, or click/tap directly. Press <strong>Space</strong> to play/pause, <strong>W</strong> to rewind to Step 1, and <strong>R</strong> to clear the sheet.</p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ALT DURUM VE KONTROL ÇUBUĞU -->
+  <footer class="bottom-hud">
+    <!-- Sol Alt: INPUT -> RULE -> STATE -> OUTPUT Canlı Diyagramı -->
+    <div class="irso-strip" role="region" aria-label="Input Rule State Output live inspector">
+      <div id="irso-input" class="irso-cell">
+        <span class="irso-title">INPUT</span>
+        <span id="irso-input-val" class="irso-code">click · space</span>
+      </div>
+      <div id="irso-rule" class="irso-cell">
+        <span class="irso-title">RULE</span>
+        <span id="irso-rule-val" class="irso-code">step = (step + 1) % 16</span>
+      </div>
+      <div id="irso-state" class="irso-cell active-stage">
+        <span class="irso-title">STATE</span>
+        <span id="irso-state-val" class="irso-code">grid[8][16]</span>
+      </div>
+      <div id="irso-output" class="irso-cell">
+        <span class="irso-title">OUTPUT</span>
+        <span id="irso-output-val" class="irso-code">notes · bar · synth</span>
+      </div>
+    </div>
+
+    <!-- Sağ Alt: Rehber ve Kısayol Çubuğu -->
+    <div class="prompt-banner">
+      <span class="prompt-text">Place notes across 16 steps. Press Space to play.</span>
+      <button id="controls-toggle-btn" class="controls-link-btn" type="button" aria-expanded="false">
+        ▸ KEYBOARD SHORTCUTS
+      </button>
+    </div>
+  </footer>
+
+  <!-- KISAYOL AÇILIR KUTUSU (CONTROLS) -->
+  <div id="controls-popover" class="controls-popover hidden" role="dialog" aria-label="Keyboard and touch controls">
+    <div class="popover-header">
+      <strong>KEYBOARD &amp; POINTER SHORTCUTS</strong>
+      <button id="close-controls-btn" class="close-btn" type="button" aria-label="Close shortcuts">✕</button>
+    </div>
+    <ul class="controls-list">
+      <li><kbd>Click / Tap</kbd> Toggle note dot on the 16-step horizontal staff</li>
+      <li><kbd>↑ ↓ ← →</kbd> Move focus cursor across 8 pitches and 16 steps</li>
+      <li><kbd>Enter</kbd> Toggle note at focused coordinate</li>
+      <li><kbd>Space</kbd> or <kbd>P</kbd> Play / Pause sequence</li>
+      <li><kbd>W</kbd> Rewind playhead to Step 1 (preserves notes)</li>
+      <li><kbd>R</kbd> Restart and clear all notes</li>
+      <li><kbd>C</kbd> Open live CODE &amp; BPM editor</li>
+      <li><kbd>D</kbd> Toggle Dark / Light studio theme</li>
+    </ul>
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
