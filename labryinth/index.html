@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Chrono Labyrinth · 04 Temporality × 05 Possibility</title>
+  <meta name="description" content="A 2D bird's-eye labyrinth combining Premise 04 (Temporality) and Premise 05 (Possibility): time pulses and fading movement echoes dynamically open and seal corridor phase gates.">
+  <meta property="og:title" content="Chrono Labyrinth · 04 Temporality × 05 Possibility">
+  <meta property="og:description" content="A 2D bird's-eye labyrinth combining Premise 04 (Temporality) and Premise 05 (Possibility): time pulses and fading movement echoes dynamically open and seal corridor phase gates.">
+  <meta property="og:type" content="website">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+
+  <!-- Ekran okuyucu için canlı durum bildirimi (Erişilebilirlik) -->
+  <div id="sr-announcer" class="sr-only" aria-live="polite" aria-atomic="true"></div>
+
+  <!-- ÜST GEZİNME VE TELEMETRİ ÇUBUĞU -->
+  <header class="top-bar-wrapper">
+    <div class="top-row">
+      <!-- Sol: Başlık ve Reset Butonu -->
+      <div class="title-banner">
+        <button id="reset-btn" class="pill-btn reset-btn" type="button" aria-label="Reset game and clear timer">
+          <span aria-hidden="true">↻</span> RESET
+        </button>
+        <div class="title-meta">
+          <h1 class="app-title">CHRONO LABYRINTH</h1>
+          <p class="app-subtitle">04 temporality × 05 possibility · arrows steer · F flips gates · G random maze</p>
+        </div>
+      </div>
+
+      <!-- Orta: Görünüm Seçici (PLAY | CODE | NOTES) -->
+      <nav class="mode-tabs" role="tablist" aria-label="View Modes">
+        <button id="tab-play" class="tab-btn active" role="tab" aria-selected="true" aria-controls="panel-play" type="button">
+          PLAY
+        </button>
+        <button id="tab-code" class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-code" type="button">
+          CODE
+        </button>
+        <button id="tab-notes" class="tab-btn" role="tab" aria-selected="false" aria-controls="panel-notes" type="button">
+          NOTES &amp; RATIONALE
+        </button>
+      </nav>
+
+      <!-- Sağ: Canlı Zaman ve Olasılık (Possibility) Telemetrisi -->
+      <div class="telemetry-card" role="status" aria-label="Live game temporal and possibility metrics">
+        <div class="telemetry-cell">
+          <span class="telemetry-label">TIME</span>
+          <span id="telemetry-time" class="telemetry-value">0.0s</span>
+        </div>
+        <div class="telemetry-cell">
+          <span class="telemetry-label">SCORE</span>
+          <span id="telemetry-score" class="telemetry-value accent-amber">0</span>
+        </div>
+        <div class="telemetry-cell">
+          <span class="telemetry-label">NEXT SHIFT</span>
+          <span id="telemetry-shift" class="telemetry-value">10.0s</span>
+        </div>
+        <div class="telemetry-cell">
+          <span class="telemetry-label">SENTINELS</span>
+          <span id="telemetry-enemies" class="telemetry-value">2</span>
+        </div>
+        <div class="telemetry-cell">
+          <span class="telemetry-label">SPEED</span>
+          <span id="telemetry-speed" class="telemetry-value accent-cyan">1.00x</span>
+        </div>
+        <div class="telemetry-cell">
+          <span class="telemetry-label">OPEN GATES</span>
+          <span id="telemetry-gates" class="telemetry-value accent-emerald">4/8</span>
+        </div>
+      </div>
+
+      <!-- En Sağ: Açık / Koyu Tema Değiştirici -->
+      <button id="theme-btn" class="pill-btn theme-btn" type="button" aria-pressed="false" aria-label="Toggle light or dark radar theme">
+        LIGHT
+      </button>
+    </div>
+
+    <!-- İkinci Satır: Oynat/Duraklat, Mod Seçici, Labirent Seçici/Rastgele Üretici, Faz Kapısı Çevirici -->
+    <div class="sub-controls-row">
+      <button id="play-pause-btn" class="pill-btn transport-btn" type="button" aria-label="Start or Pause survival timer">
+        <span id="play-pause-icon" aria-hidden="true">▶</span>
+        <span id="play-pause-text">START</span>
+      </button>
+
+      <div class="mode-switch-group" role="group" aria-label="Temporal Escalation Mode">
+        <button id="mode-spawn-btn" class="pill-btn mode-choice-btn active" type="button">
+          <span aria-hidden="true">✚</span> MODE 1: SPAWN
+        </button>
+        <button id="mode-speed-btn" class="pill-btn mode-choice-btn" type="button">
+          <span aria-hidden="true">⚡</span> MODE 2: SPEED
+        </button>
+      </div>
+
+      <!-- Labirent Düzeni Seçici ve Rastgele Labirent Üretici (Premise 05: Possibility Space) -->
+      <div class="maze-select-group" role="group" aria-label="Maze Layout Selection">
+        <label for="toolbar-maze-select" class="sr-only">Choose Maze Layout</label>
+        <select id="toolbar-maze-select" class="toolbar-select" aria-label="Select Maze Layout Preset">
+          <option value="CLASSIC" selected>🗺️ Map 1: Classic Labyrinth</option>
+          <option value="RINGS">🗺️ Map 2: Concentric Rings</option>
+          <option value="CROSSROADS">🗺️ Map 3: Crossroads Chamber</option>
+          <option value="RANDOM">🎲 Map 4: Custom Random</option>
+        </select>
+        <button id="random-maze-btn" class="pill-btn random-maze-btn" type="button" aria-label="Generate a new random maze layout (Shortcut: G)">
+          <span aria-hidden="true">🎲</span>
+          <span>RANDOM MAZE (G)</span>
+        </button>
+      </div>
+
+      <!-- Premise 05 (Possibility) Aktif Kapı Fazı Değiştirme Butonu (Klavye: F) -->
+      <button id="phase-flip-btn" class="pill-btn phase-flip-btn" type="button" aria-label="Manually invert open and sealed Phase Gates (Shortcut: F)">
+        <span aria-hidden="true">⇄</span>
+        <span id="phase-flip-text">FLIP GATES (F) · PHASE A</span>
+      </button>
+
+      <button id="toggle-dpad-btn" class="pill-btn dpad-toggle-btn" type="button" aria-pressed="false" title="Toggle on-screen arrow buttons for touch devices">
+        <span>🎮 DPAD: OFF</span>
+      </button>
+
+      <label class="reading-pause-chip" for="pause-reading-checkbox">
+        <input type="checkbox" id="pause-reading-checkbox" checked>
+        <span>Pause in CODE / NOTES</span>
+      </label>
+    </div>
+  </header>
+
+  <!-- ANA SAHNE: 2D KUŞBAKIŞI LABİRENT VE CODE / NOTES ÇEKMECELERİ -->
+  <main class="stage-area">
+    <div class="labyrinth-console">
+
+      <!-- PLAY PANELİ: 2D Kuşbakışı Labirent Sahnesi -->
+      <section id="panel-play" class="maze-frame" role="tabpanel" aria-labelledby="tab-play">
+        <div class="maze-header">
+          <div class="maze-status-left">
+            <span id="game-state-badge" class="state-badge">READY — PRESS ARROWS OR START</span>
+            <span id="active-mode-banner" class="mode-banner">Mode 1: +1 Sentinel &amp; Gate Flip every 10s</span>
+            <span id="gate-phase-badge" class="phase-badge">PHASE A OPEN (4/8) · ECHO-SEALED: 0 (⛌)</span>
+          </div>
+
+          <!-- Sonraki Zaman Kırılması (Shift) İlerleme Çubuğu -->
+          <div class="shift-progress-wrap" aria-label="Time until next escalation shift and gate polarity flip">
+            <span class="shift-label">SHIFT &amp; GATE PULSE</span>
+            <div class="shift-bar-track">
+              <div id="shift-bar-fill" class="shift-bar-fill"></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2D Kuşbakışı Oyun Tuvali (Canvas) ve Durum Katmanı -->
+        <div class="canvas-viewport">
+          <canvas id="maze-canvas" width="900" height="612" aria-label="2D Bird's Eye View Temporal and Possibility Maze"></canvas>
+
+          <!-- Başlangıç / Duraklatma / Oyun Bitti Katmanı -->
+          <div id="canvas-overlay" class="canvas-overlay">
+            <div class="overlay-card">
+              <h2 id="overlay-title" class="overlay-title">CHRONO LABYRINTH · 04 × 05</h2>
+              <p id="overlay-desc" class="overlay-desc">
+                Steer with <strong>Arrow Keys (↑ ↓ ← →)</strong>, <strong>Swipe on the Maze</strong>, or use the <strong>Thumb D-Pad</strong>. Press <strong>F / ⇄</strong> to invert <strong>Phase Gates</strong>. Crossing an open gate (<strong>⊶</strong>) leaves a 6s <strong>Echo Trail</strong> that seals the doorway behind you (<strong>⛌</strong>)—blocking Sentinels, but cutting off your own retreat.
+              </p>
+
+              <!-- Başlamadan Önce Labirent Seçici ve Rastgele Üretici -->
+              <div class="overlay-maze-section">
+                <span class="overlay-section-label">CHOOSE MAZE TOPOLOGY OR GENERATE RANDOM:</span>
+                <div class="overlay-maze-buttons" role="group" aria-label="Choose maze layout before starting">
+                  <button type="button" class="pill-btn overlay-maze-btn active" data-maze="CLASSIC">
+                    1 · Classic
+                  </button>
+                  <button type="button" class="pill-btn overlay-maze-btn" data-maze="RINGS">
+                    2 · Rings
+                  </button>
+                  <button type="button" class="pill-btn overlay-maze-btn" data-maze="CROSSROADS">
+                    3 · Crossroads
+                  </button>
+                  <button type="button" id="overlay-random-maze-btn" class="pill-btn overlay-maze-btn random-accent">
+                    🎲 Randomize (G)
+                  </button>
+                </div>
+              </div>
+
+              <div class="overlay-actions">
+                <button id="overlay-start-btn" class="pill-btn primary-action-btn" type="button">
+                  ▶ START RUN (SPACE / SWIPE / TAP)
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Ekran Üstü Ergonomik İki Başparmak Kontrol Konsolu (Dokunmatik Telefon / Tablet / Fare için) -->
+        <div id="onscreen-dpad" class="onscreen-dpad hidden" aria-label="On-screen directional arrow buttons and quick actions">
+          <div class="dpad-cross-pad" role="group" aria-label="Directional D-Pad">
+            <button type="button" class="dpad-btn dpad-up" data-dir="UP" aria-label="Move Up">↑</button>
+            <div class="dpad-mid-row">
+              <button type="button" class="dpad-btn dpad-left" data-dir="LEFT" aria-label="Move Left">←</button>
+              <button type="button" class="dpad-btn dpad-down" data-dir="DOWN" aria-label="Move Down">↓</button>
+              <button type="button" class="dpad-btn dpad-right" data-dir="RIGHT" aria-label="Move Right">→</button>
+            </div>
+          </div>
+
+          <div class="dpad-action-cluster" role="group" aria-label="Touch quick actions">
+            <button type="button" id="dpad-flip-btn" class="dpad-action-btn dpad-flip" aria-label="Flip Phase Gates (Shortcut: F)">
+              <span class="dpad-action-icon" aria-hidden="true">⇄</span>
+              <span id="dpad-flip-label" class="dpad-action-label">FLIP GATES · PHASE A</span>
+            </button>
+            <div class="dpad-sub-actions">
+              <button type="button" id="dpad-pause-btn" class="pill-btn dpad-mini-btn" aria-label="Start or Pause game">▶ START</button>
+              <button type="button" id="dpad-random-btn" class="pill-btn dpad-mini-btn" aria-label="Generate Random Maze">🎲 RANDOM MAP</button>
+            </div>
+            <span class="dpad-swipe-hint">Touch Tip: Swipe anywhere on the maze to steer · 2-finger tap flips gates</span>
+          </div>
+        </div>
+
+        <div class="maze-footer">
+          <span><strong>◆ Weaver:</strong> Arrows / Swipe / D-Pad · <strong>F / ⇄:</strong> Flip Gates · <strong>G:</strong> Random Maze</span>
+          <span><strong>⊶ Open · ╬ Pulse-Sealed · ⛌ Echo-Sealed:</strong> Possibility Gates (<span id="footer-trail-sec">6</span>s echo lock)</span>
+          <span><strong>▲ Stalker · ⬢ Drifter · ✳ Wraith:</strong> Geometric Sentinels</span>
+        </div>
+      </section>
+
+      <!-- CODE PANELİ: Canlı DESIGN (Temporality + Possibility) Düzenleyicisi -->
+      <section id="panel-code" class="drawer-panel hidden" role="tabpanel" aria-labelledby="tab-code">
+        <div class="drawer-header drawer-header-row">
+          <div>
+            <h2 class="drawer-title">LIVE DESIGN INSPECTOR — 04 TEMPORALITY × 05 POSSIBILITY</h2>
+            <p class="drawer-desc">Modify any rule, gate count, maze topology, or constant below to test live changes immediately. All parameters map directly to the top-level <code>DESIGN</code> object in <code>script.js</code>.</p>
+          </div>
+          <button id="reset-code-btn" class="pill-btn reset-code-btn" type="button" aria-label="Reset all CODE parameters and sliders to factory defaults">
+            <span aria-hidden="true">↻</span> RESET CODE TO DEFAULTS
+          </button>
+        </div>
+
+        <div class="code-editor-grid">
+          <div class="code-control-card">
+            <label for="select-code-maze" class="code-label">
+              <span>DESIGN.MAZE_PRESET</span>
+            </label>
+            <div class="code-inline-row">
+              <select id="select-code-maze" class="code-select">
+                <option value="CLASSIC" selected>CLASSIC (Map 1)</option>
+                <option value="RINGS">RINGS (Map 2)</option>
+                <option value="CROSSROADS">CROSSROADS (Map 3)</option>
+                <option value="RANDOM">RANDOM (Procedural)</option>
+              </select>
+              <button type="button" id="code-random-maze-btn" class="pill-btn code-mini-btn" title="Generate new random maze">🎲 Reroll</button>
+            </div>
+            <p class="code-comment">// Premise 05: Labirentin fiziksel koridor yapısını seçer veya rastgele üretir.</p>
+          </div>
+
+          <div class="code-control-card">
+            <label for="input-gate-count" class="code-label">
+              <span>DESIGN.GATE_COUNT</span>
+              <strong id="label-gate-count-val">8 (4A / 4B)</strong>
+            </label>
+            <input type="range" id="input-gate-count" min="0" max="16" step="2" value="8">
+            <p class="code-comment">// Premise 05: Haritadaki toplam Faz Kapısı sayısı (0 = kapısız, 16 = maksimum daralma).</p>
+          </div>
+
+          <div class="code-control-card">
+            <label for="select-code-mode" class="code-label">
+              <span>DESIGN.GAME_MODE</span>
+            </label>
+            <select id="select-code-mode" class="code-select">
+              <option value="SPAWN" selected>MODE 1: SPAWN (+Enemies &amp; Gate Flip)</option>
+              <option value="SPEED">MODE 2: SPEED (+Velocity &amp; Gate Flip)</option>
+            </select>
+            <p class="code-comment">// Premise 04: Zaman ilerledikçe düşman sayısının mı yoksa hızının mı artacağını seçer.</p>
+          </div>
+
+          <div class="code-control-card">
+            <label for="input-interval" class="code-label">
+              <span>DESIGN.ESCALATION_INTERVAL_SEC</span>
+              <strong id="label-interval-val">10s</strong>
+            </label>
+            <input type="range" id="input-interval" min="4" max="25" step="1" value="10">
+            <p class="code-comment">// Premise 04×05: Kaç saniyede bir Shift Pulse ve Faz Kapısı (Phase Gate) değişimi olacağı.</p>
+          </div>
+
+          <div class="code-control-card">
+            <label for="input-trail-memory" class="code-label">
+              <span>DESIGN.TRAIL_MEMORY_SEC</span>
+              <strong id="label-trail-val">6s</strong>
+            </label>
+            <input type="range" id="input-trail-memory" min="1" max="15" step="1" value="6">
+            <p class="code-comment">// Premise 04×05: Echo Trail süresi VE geçilen kapının (⛌) kaç saniye kilitli kalacağı.</p>
+          </div>
+
+          <div class="code-control-card">
+            <label for="select-trail-seals" class="code-label">
+              <span>DESIGN.TRAIL_SEALS_GATES</span>
+            </label>
+            <select id="select-trail-seals" class="code-select">
+              <option value="true" selected>TRUE (Crossing an open gate Echo-Seals it ⛌)</option>
+              <option value="false">FALSE (Gates only flip on Shift Pulses / F key)</option>
+            </select>
+            <p class="code-comment">// Premise 05: Oyuncunun bıraktığı izin açık kapıları arkasından kilitleyip kilitlemeyeceği.</p>
+          </div>
+
+          <div class="code-control-card">
+            <label for="input-flip-cooldown" class="code-label">
+              <span>DESIGN.PHASE_FLIP_COOLDOWN_SEC</span>
+              <strong id="label-flip-cooldown-val">6s</strong>
+            </label>
+            <input type="range" id="input-flip-cooldown" min="1" max="15" step="1" value="6">
+            <p class="code-comment">// Premise 05: Manuel kapı çevirme (F tuşu) hareketinin bekleme süresi.</p>
+          </div>
+
+          <div class="code-control-card">
+            <label for="input-flip-cost" class="code-label">
+              <span>DESIGN.PHASE_FLIP_TIME_COST_SEC</span>
+              <strong id="label-flip-cost-val">+2.0s</strong>
+            </label>
+            <input type="range" id="input-flip-cost" min="0" max="5" step="0.5" value="2">
+            <p class="code-comment">// Premise 04×05: Manuel kapı çevirmenin sonraki Shift Pulse sayacını ne kadar hızlandıracağı.</p>
+          </div>
+
+          <div class="code-control-card">
+            <label for="input-initial-enemies" class="code-label">
+              <span>DESIGN.INITIAL_ENEMIES</span>
+              <strong id="label-init-enemies-val">2</strong>
+            </label>
+            <input type="range" id="input-initial-enemies" min="1" max="6" step="1" value="2">
+            <p class="code-comment">// Premise 04: Başlangıçta (t = 0) labirentte bulunan Sentinel sayısı.</p>
+          </div>
+
+          <div class="code-control-card">
+            <label for="input-max-enemies" class="code-label">
+              <span>DESIGN.MAX_ENEMIES (Mode 1 Cap)</span>
+              <strong id="label-max-enemies-val">8</strong>
+            </label>
+            <input type="range" id="input-max-enemies" min="3" max="14" step="1" value="8">
+            <p class="code-comment">// Premise 04: Mod 1'de labirente eklenebilecek maksimum düşman sınırı.</p>
+          </div>
+
+          <div class="code-control-card">
+            <label for="input-speed-step" class="code-label">
+              <span>DESIGN.ENEMY_SPEED_STEP (Mode 2)</span>
+              <strong id="label-speed-step-val">+0.15x</strong>
+            </label>
+            <input type="range" id="input-speed-step" min="0.05" max="0.45" step="0.05" value="0.15">
+            <p class="code-comment">// Premise 04: Mod 2'de her zaman diliminde düşman hızına eklenecek artış çarpanı.</p>
+          </div>
+
+          <div class="code-control-card">
+            <label for="input-player-speed" class="code-label">
+              <span>DESIGN.PLAYER_SPEED (Tiles/sec)</span>
+              <strong id="label-player-speed-val">5.5</strong>
+            </label>
+            <input type="range" id="input-player-speed" min="3.5" max="8.5" step="0.5" value="5.5">
+            <p class="code-comment">// Oyuncunun saniyede katettiği koridor karesi hızı.</p>
+          </div>
+        </div>
+
+        <!-- Canlı Kod Görünümü -->
+        <pre id="live-code-pre" class="live-code-block" aria-label="Live DESIGN object configuration"></pre>
+      </section>
+
+      <!-- NOTES PANELİ: İki Önerme Etkileşimi, Canlı Değişiklik Rehberi ve 350 Kelimelik RATIONALE -->
+      <section id="panel-notes" class="drawer-panel hidden" role="tabpanel" aria-labelledby="tab-notes">
+        <div class="drawer-header">
+          <h2 class="drawer-title">TWO PREMISES, ONE EXPERIENCE · DESIGN RATIONALE &amp; LIVE-CHANGE GUIDE</h2>
+          <p class="drawer-desc">Combining <strong>Premise 04: Temporality</strong> ("Design time as much as space") × <strong>Premise 05: Possibility</strong> ("Design the space of possibilities, not the object").</p>
+        </div>
+
+        <div class="notes-columns">
+          <div class="note-card">
+            <h3>1. How Premise 04 × Premise 05 Interact</h3>
+            <p><strong>One-Sentence Test:</strong> <em>"Because of <strong>Temporality (04)</strong>, the participant's movement leaves a 6-second Echo Trail and advances periodic 10-second Shift Pulses, and because of <strong>Possibility (05)</strong>, those temporal traces and pulses dynamically seal or open Phase Gates across the maze—changing which routes are physically possible."</em></p>
+            <p>Crossing an open gate (<strong>⊶</strong>) locks it into an <strong>Echo-Sealed barrier (⛌)</strong> behind you for 6 seconds. It blocks pursuing Sentinels, but also eliminates your own ability to backtrack through that corridor.</p>
+          </div>
+
+          <div class="note-card">
+            <h3>2. Comparison Experiment (Mode 1 vs. Mode 2 &amp; Layouts)</h3>
+            <p>Both modes share the Phase Gate &amp; Echo-Seal rules across all 3 preset layouts (<strong>Classic</strong>, <strong>Rings</strong>, <strong>Crossroads</strong>) and procedural <strong>Random Mazes (G)</strong>. Play a 45-second run in <strong>Mode 1 (Spawn)</strong>, click <strong>Reset</strong>, and play 45 seconds in <strong>Mode 2 (Speed)</strong>. Observe how sealing a gate behind yourself protects you from fast single pursuers in Mode 2, but can trap you between multiple converging Sentinels in Mode 1.</p>
+          </div>
+
+          <div class="note-card">
+            <h3>3. Live-Change Cheat Sheet (For Class Presentation)</h3>
+            <p>All rules live at the top of <code>script.js</code> inside <code>DESIGN</code>:</p>
+            <p>• <strong>Line 21:</strong> <code>MAZE_PRESET: 'CLASSIC'</code> — Switch default layout (<code>'CLASSIC'</code>, <code>'RINGS'</code>, <code>'CROSSROADS'</code>, <code>'RANDOM'</code>).<br>
+               • <strong>Line 46:</strong> <code>TRAIL_MEMORY_SEC: 6</code> — Changes both trail duration and how long Echo-Sealed gates stay locked.<br>
+               • <strong>Line 56:</strong> <code>TRAIL_SEALS_GATES: true</code> — Set to <code>false</code> to disable echo-locking.<br>
+               • <strong>Line 66:</strong> <code>PHASE_FLIP_TIME_COST_SEC: 2.0</code> — Time penalty added when flipping gates manually.</p>
+          </div>
+        </div>
+
+        <!-- 350 Kelimelik RATIONALE.md Özeti -->
+        <div class="rationale-box">
+          <div class="rationale-header">
+            <h3>350-Word Design Rationale (Also saved in <code>RATIONALE.md</code>)</h3>
+            <span class="word-count-tag">348 words (within 315–385 target)</span>
+          </div>
+          <div class="rationale-content">
+            <p><strong>1. Idea.</strong> <em>Chrono Labyrinth</em> is a 2D bird’s-eye survival maze where the participant steers the Weaver (◆) away from geometric Sentinels (▲, ⬢, ✳) using arrow keys or on-screen directional controls. Rather than navigating a static map, the participant’s movement history and survival duration continuously reconfigure which corridors are open or impassable.</p>
+            <p><strong>2. Premise A and B.</strong> The experience combines <strong>Premise 04: Temporality</strong> (“interaction happens in time”) and <strong>Premise 05: Possibility</strong> (“a system makes some actions possible and others impossible”). Temporality lives in <code>ruleUpdateTrailMemory()</code> and <code>ruleTriggerTemporalShift()</code>: the player leaves a fading six-second Echo Trail and faces a Shift Pulse every ten seconds that either spawns a new Sentinel (Mode 1) or increases Sentinel velocity (Mode 2). Possibility lives in <code>ruleUpdatePhaseGates()</code> and <code>ruleIsWalkableTile()</code>: eight corridor Phase Gates alternate between open (⊶) and sealed (╬) on every Shift Pulse, or when the player presses <code>F</code> to manually invert gate polarity at the cost of advancing the clock by two seconds. Crucially, the two premises depend on each other: crossing an open gate leaves an Echo Trail on its threshold that Echo-Seals (⛌) the doorway for six seconds. Using a shortcut blocks pursuers behind you, but simultaneously eliminates your own possibility of backtracking.</p>
+            <p><strong>3. Theory.</strong> First, Gaver’s (1991) concept of <em>sequential and perceptible affordances</em>—where acting on one perceived possibility reveals or forecloses subsequent possibilities over time—shaped our three distinct non-color gate states (<code>OPEN ⊶</code>, <code>PULSE_SEALED ╬</code>, and <code>ECHO_SEALED ⛌</code> with a radial decay ring). A limit of Gaver’s framework is that it treats affordances as stable physical properties; in our maze, an open corridor’s passability is ephemeral and reverses mid-approach. Second, Bogost’s (2007) concept of <em>procedural rhetoric and possibility space</em>—that arguments are made through rule constraints rather than static visuals—shaped our <code>TRAIL_SEALS_GATES</code> rule, where past movement literally narrows future spatial freedom. As a counterpoint, strict procedural constraints can feel punishing when multiple Sentinels converge, prompting us to add the manual Phase Flip (<code>F</code>) escape valve.</p>
+            <p><strong>4. What I learned.</strong> During testing, locking a gate the instant a player touched it trapped them inside the doorway. Observing this, I revised <code>ruleUpdatePhaseGates()</code> so gates arm upon entry and seal only after the player steps onto an adjacent tile.</p>
+            <p class="rationale-refs"><strong>References:</strong><br>
+            • Bogost, I. (2007). <em>Persuasive Games: The Expressive Power of Videogames</em>. MIT Press. <a href="https://mitpress.mit.edu/9780262514880/persuasive-games/" target="_blank" rel="noopener noreferrer">https://mitpress.mit.edu/9780262514880/persuasive-games/</a><br>
+            • Gaver, W. W. (1991). Technology affordances. In <em>Proceedings of the SIGCHI Conference on Human Factors in Computing Systems (CHI ’91)</em> (pp. 79–84). ACM. <a href="https://doi.org/10.1145/108844.108856" target="_blank" rel="noopener noreferrer">https://doi.org/10.1145/108844.108856</a></p>
+          </div>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- ALT DURUM, IRSO DİYAGRAMI VE KREDİ ÇUBUĞU -->
+  <footer class="bottom-hud">
+    <!-- Sol Alt: INPUT -> RULE -> STATE -> OUTPUT Canlı Diyagramı -->
+    <div class="irso-strip" role="region" aria-label="Input Rule State Output live inspector">
+      <div id="irso-input" class="irso-cell">
+        <span class="irso-title">INPUT</span>
+        <span id="irso-input-val" class="irso-code">arrows · F · G</span>
+      </div>
+      <div id="irso-rule" class="irso-cell">
+        <span class="irso-title">RULE (04×05)</span>
+        <span id="irso-rule-val" class="irso-code">echo seals gates</span>
+      </div>
+      <div id="irso-state" class="irso-cell active-stage">
+        <span class="irso-title">STATE</span>
+        <span id="irso-state-val" class="irso-code">t:0.0s · gates:4/8</span>
+      </div>
+      <div id="irso-output" class="irso-cell">
+        <span class="irso-title">OUTPUT</span>
+        <span id="irso-output-val" class="irso-code">maze · trail · gates</span>
+      </div>
+    </div>
+
+    <!-- Sağ Alt: Rehber, Kredi ve Kısayol Çubuğu -->
+    <div class="prompt-banner">
+      <span class="prompt-text">NMED 3203 · Premise 04 (Temporality) × Premise 05 (Possibility) · Inspired by IMA Lab Ghost Chase &amp; Sand Box</span>
+      <button id="controls-toggle-btn" class="controls-link-btn" type="button" aria-expanded="false">
+        ▸ CONTROLS
+      </button>
+    </div>
+  </footer>
+
+  <!-- KISAYOL AÇILIR KUTUSU (CONTROLS) -->
+  <div id="controls-popover" class="controls-popover hidden" role="dialog" aria-label="Keyboard and pointer controls">
+    <div class="popover-header">
+      <strong>CONTROLS &amp; KEYBOARD BINDS</strong>
+      <button id="close-controls-btn" class="close-btn" type="button" aria-label="Close controls">✕</button>
+    </div>
+    <ul class="controls-list">
+      <li><kbd>↑ ↓ ← →</kbd> or <kbd>Swipe</kbd> Steer Weaver through open corridors (or use 🎮 DPAD)</li>
+      <li><kbd>F</kbd> or <kbd>⇄</kbd> Flip Phase A / Phase B gates manually (+2s shift cost; or 2-finger tap maze)</li>
+      <li><kbd>G</kbd> Generate a new symmetric Random Maze layout</li>
+      <li><kbd>1</kbd> <kbd>2</kbd> <kbd>3</kbd> Switch preset mazes (Classic, Rings, Crossroads)</li>
+      <li><kbd>Space</kbd> or <kbd>P</kbd> Start / Pause / Resume run</li>
+      <li><kbd>R</kbd> Reset timer, score, trail, gates, and enemies to t = 0.0s</li>
+      <li><kbd>M</kbd> Toggle between Mode 1 (Spawn) and Mode 2 (Speed)</li>
+      <li><kbd>C</kbd> Open live CODE inspector to edit DESIGN numbers</li>
+      <li><kbd>T</kbd> Toggle Light / Dark radar theme</li>
+    </ul>
+  </div>
+
+  <script type="module" src="./script.js"></script>
+</body>
+</html>
