@@ -8,7 +8,7 @@
 
 1. **Premise 04 — Temporality**: *Interaction happens in time. Promise: Design time as much as space.*
    - Implemented in `ruleUpdateTrailMemory()` and `ruleTriggerTemporalShift()` in `script.js`.
-   - Survival score scales with time (`SCORE_PER_SECOND`), player movement leaves a 6-second fading **Echo Trail** (`TRAIL_MEMORY_SEC`), and every 10 seconds (`ESCALATION_INTERVAL_SEC`) a **Shift Pulse** either spawns a new Sentinel (**Mode 1: Spawn**) or accelerates Sentinel velocity (**Mode 2: Speed**).
+   - Survival score scales with time (`SCORE_PER_SECOND`), player movement leaves a fading **Echo Trail** (`TRAIL_MEMORY_SEC`), and every 10 seconds (`ESCALATION_INTERVAL_SEC`) a **Shift Pulse** either spawns a new Sentinel (**Mode 1: Spawn**) or accelerates Sentinel velocity (**Mode 2: Speed**).
 2. **Premise 05 — Possibility**: *A system makes some actions possible and others impossible. Promise: Design the space of possibilities, not the object.*
    - Implemented in `ruleUpdatePhaseGates()`, `ruleIsWalkableTile()`, and `handleManualPhaseFlip()` in `script.js`.
    - Eight strategic **Phase Gates** (`3` = Phase A, `4` = Phase B in `DESIGN.MAZE_LAYOUT`) alternate between **OPEN (`⊶`)** and **PULSE-SEALED (`╬`)** on every Shift Pulse or when the player presses `F` (`FLIP GATES`).
